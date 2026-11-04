@@ -53,7 +53,7 @@ func Init(logLevel log.Level) {
 	}
 
 	if len(modulesMap) == 0 {
-		log.Info(utils.PrepareWarningOutput("No git modules to install."))
+		utils.LogWarning("No git modules to install.")
 		return
 	}
 

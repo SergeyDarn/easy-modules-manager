@@ -13,17 +13,17 @@ import (
 )
 
 const (
-	GIT_URL_SEPARATOR = "#"
-	GIT_NORMAL_URL    = "http"
-	TAG_REGEXP        = `\d(\..*)+`
+	gitUrlSeparator = "#"
+	gitNormalUrl    = "http"
+	tagRegexp       = `\d(\..*)+`
 )
 
 const (
-	REPO_COLOR   = lipgloss.Color("#f98b6c")
-	URL_COLOR    = lipgloss.Color("#4a26fd")
-	TAG_COLOR    = lipgloss.Color("#ef4fa6")
-	HASH_COLOR   = lipgloss.Color("#1e88e5")
-	BRANCH_COLOR = lipgloss.Color("#03dac6")
+	repoColor   = lipgloss.Color("#f98b6c")
+	urlColor    = lipgloss.Color("#4a26fd")
+	tagColor    = lipgloss.Color("#ef4fa6")
+	hashColor   = lipgloss.Color("#1e88e5")
+	branchColor = lipgloss.Color("#03dac6")
 )
 
 func GitClone(
@@ -31,8 +31,8 @@ func GitClone(
 	repoUrl string,
 	repoDirPath string,
 ) {
-	repoLog := prepareGitColorOutput("repo="+repoName, REPO_COLOR)
-	urlLog := prepareGitColorOutput("url="+repoUrl, URL_COLOR)
+	repoLog := ColorText("repo="+repoName, repoColor)
+	urlLog := ColorText("url="+repoUrl, urlColor)
 	log.Debugf("Cloning %s %s", repoLog, urlLog)
 
 	cleanModuleUrl, commitHash, branch, tag := parseGitUrl(repoUrl)
@@ -61,8 +61,8 @@ func GitClone(
 	headName := GetHeadShortName(repo, commitHash != "", tag != "")
 	headColor := getGitColor(commitHash != "", tag != "")
 
-	headLog := prepareGitColorOutput("head="+headName, headColor)
-	successLog := PrepareSuccessOutput("Cloning successful")
+	headLog := ColorText("head="+headName, headColor)
+	successLog := ColorSuccess("Cloning successful")
 	log.Debugf("%s %s %s", successLog, repoLog, headLog)
 }
 
@@ -99,8 +99,8 @@ func GitCheckoutToCommit(
 	commitLog := "commitHash=" + commitHash
 	CheckError(err, fmt.Sprintf("Error while trying to checkout %s %s", repoLog, commitLog))
 
-	repoColorLog := prepareGitColorOutput(repoLog, REPO_COLOR)
-	commitColorLog := prepareGitColorOutput(commitLog, HASH_COLOR)
+	repoColorLog := ColorText(repoLog, repoColor)
+	commitColorLog := ColorText(commitLog, hashColor)
 	log.Debugf("Sucessful checkout for %s to %s", repoColorLog, commitColorLog)
 }
 
@@ -164,7 +164,7 @@ func parseGitUrl(gitUrl string) (
 		return "", "", "", ""
 	}
 
-	splitUrl := strings.Split(gitUrl, GIT_URL_SEPARATOR)
+	splitUrl := strings.Split(gitUrl, gitUrlSeparator)
 	cleanUrl := splitUrl[0]
 	hasReference := len(splitUrl) > 1
 
@@ -192,7 +192,7 @@ func prepareGitReference(baseReference string) (
 	var branch plumbing.ReferenceName
 	var tag plumbing.ReferenceName
 
-	tagRegexp, _ := regexp.Compile(TAG_REGEXP)
+	tagRegexp, _ := regexp.Compile(tagRegexp)
 
 	if tagRegexp.MatchString(baseReference) {
 		tag = plumbing.NewTagReferenceName(baseReference)
@@ -205,17 +205,17 @@ func prepareGitReference(baseReference string) (
 	baseLog := "Parsed from git url "
 
 	if commitHash != "" {
-		commitLog := prepareGitColorOutput("commitHash="+commitHash, HASH_COLOR)
+		commitLog := ColorText("commitHash="+commitHash, hashColor)
 		log.Debug(baseLog + commitLog)
 	}
 
 	if branch != "" {
-		branchLog := prepareGitColorOutput("branch="+branch.Short(), BRANCH_COLOR)
+		branchLog := ColorText("branch="+branch.Short(), branchColor)
 		log.Debug(baseLog + branchLog)
 	}
 
 	if tag != "" {
-		tagLog := prepareGitColorOutput("tag="+tag.Short(), TAG_COLOR) + " "
+		tagLog := ColorText("tag="+tag.Short(), tagColor) + " "
 		log.Debug(baseLog + tagLog)
 	}
 
@@ -223,12 +223,12 @@ func prepareGitReference(baseReference string) (
 }
 
 func getGitAuth(repoUrl string) *ssh.PublicKeys {
-	if strings.Contains(repoUrl, GIT_NORMAL_URL) {
+	if strings.Contains(repoUrl, gitNormalUrl) {
 		return nil
 	}
 
-	sshKeyPath := GetEnv(ENV_SSH_KEY_PATH)
-	sshKeyPassword := GetEnv(ENV_SSH_KEY_PASSWORD)
+	sshKeyPath := GetSshKeyPath()
+	sshKeyPassword := GetSshKeyPassword()
 
 	auth, err := ssh.NewPublicKeysFromFile("git", sshKeyPath, sshKeyPassword)
 	CheckError(err, "Error while creating git clone auth")
@@ -236,18 +236,14 @@ func getGitAuth(repoUrl string) *ssh.PublicKeys {
 	return auth
 }
 
-func prepareGitColorOutput(output string, color lipgloss.Color) string {
-	return PrepareColorOutput(output, color)
-}
-
 func getGitColor(isHash bool, isTag bool) lipgloss.Color {
 	if isHash {
-		return HASH_COLOR
+		return hashColor
 	}
 
 	if isTag {
-		return TAG_COLOR
+		return tagColor
 	}
 
-	return BRANCH_COLOR
+	return branchColor
 }

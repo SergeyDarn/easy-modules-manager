@@ -11,7 +11,7 @@ func TestPanic(t *testing.T, testName string, functionToTest func()) {
 
 	functionToTest()
 
-	t.Errorf(PrepareDangerOutput("Expected test %s to error."), testName)
+	t.Errorf(ColorDanger("Expected test %s to error."), testName)
 }
 
 func CheckTestError(t *testing.T, err error) {

@@ -6,12 +6,13 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/log"
 )
 
 const (
-	SUCCESS_COLOR = lipgloss.Color("#75d57f")
-	WARNING_COLOR = lipgloss.Color("192")
-	DANGER_COLOR  = lipgloss.Color("204")
+	successColor = lipgloss.Color("#75d57f")
+	warningColor = lipgloss.Color("192")
+	dangerColor  = lipgloss.Color("204")
 )
 
 func CheckError(err error, readableErrMessage string) {
@@ -23,7 +24,7 @@ func CheckError(err error, readableErrMessage string) {
 }
 
 func ThrowError(err string) {
-	panic(PrepareDangerOutput(err))
+	panic(ColorDanger(err))
 }
 
 func GetPathRootDir(path string) string {
@@ -36,20 +37,32 @@ func GetPathRootDir(path string) string {
 	return splitPath[0]
 }
 
-func PrepareSuccessOutput(output string) string {
-	return PrepareColorOutput(output, SUCCESS_COLOR)
+func LogSuccess(text string) {
+	log.Info(ColorSuccess(text))
 }
 
-func PrepareWarningOutput(output string) string {
-	return PrepareColorOutput(output, WARNING_COLOR)
+func LogWarning(text string) {
+	log.Warn(ColorWarning(text))
 }
 
-func PrepareDangerOutput(output string) string {
-	return PrepareColorOutput(output, DANGER_COLOR)
+func LogError(text string) {
+	log.Error(ColorDanger(text))
 }
 
-func PrepareColorOutput(output string, color lipgloss.Color) string {
-	return lipgloss.NewStyle().Foreground(lipgloss.TerminalColor(color)).Render(output)
+func ColorText(text string, color lipgloss.Color) string {
+	return lipgloss.NewStyle().Foreground(lipgloss.TerminalColor(color)).Render(text)
+}
+
+func ColorDanger(text string) string {
+	return ColorText(text, dangerColor)
+}
+
+func ColorSuccess(text string) string {
+	return ColorText(text, successColor)
+}
+
+func ColorWarning(text string) string {
+	return ColorText(text, warningColor)
 }
 
 func ReadJson[T any](file string) T {

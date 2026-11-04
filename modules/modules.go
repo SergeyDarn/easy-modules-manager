@@ -18,30 +18,30 @@ type JsonConfig struct {
 	DevDependencies map[string]string
 }
 
-var MODULES_DIR_PERMISSIONS os.FileMode = 0o777
+var modulesDirPermissions os.FileMode = 0o777
 
 func getModulesDir() string {
-	return utils.GetEnv(utils.ENV_MODULES_DIR)
+	return utils.GetModulesDir()
 }
 
 func ReadConfigJson() JsonConfig {
-	configFile := utils.GetEnv(utils.ENV_CONFIG_FILE)
+	configFile := utils.GetConfigFile()
 	return utils.ReadJson[JsonConfig](configFile)
 }
 
 func CreateModulesDir() {
-	err := os.MkdirAll(getModulesDir(), MODULES_DIR_PERMISSIONS)
+	err := os.MkdirAll(getModulesDir(), modulesDirPermissions)
 	utils.CheckError(err, "Error when creating modules folder")
 }
 
 func RemoveModulesDir() {
 	err := os.RemoveAll(getModulesDir())
 	utils.CheckError(err, "Error while trying to delete modules folder")
-	log.Debug(utils.PrepareDangerOutput("Modules folder deleted before installation"))
+	log.Debug(utils.ColorDanger("Modules folder deleted before installation"))
 }
 
 func InstallModules(modules map[string]string, parallelInstall bool) {
-	log.Debugf("Installing modules into %s", getModulesDir())
+	log.Infof("Installing modules into %s", getModulesDir())
 	fmt.Println()
 
 	start := time.Now()
@@ -65,8 +65,8 @@ func InstallModules(modules map[string]string, parallelInstall bool) {
 		waitGroup.Wait()
 	}
 
-	log.Debugf(
-		utils.PrepareSuccessOutput("Installation of %d modules took %s"),
+	log.Infof(
+		utils.ColorSuccess("Installation of %d modules took %s"),
 		len(modules),
 		time.Since(start),
 	)
@@ -89,8 +89,8 @@ func installModule(moduleName string, moduleUrl string) {
 
 	gitStatus := utils.GitDirStatus(moduleDir)
 	if gitStatus.String() != "" {
-		log.Infof(
-			utils.PrepareWarningOutput(
+		log.Warnf(
+			utils.ColorWarning(
 				"\nThere are unsaved changes for module \"%s\" - skipping it\n"+
 					"\n%s",
 			),
@@ -122,12 +122,12 @@ func ShowChangedModules() {
 	}
 
 	if len(changedModules) == 0 {
-		log.Info(utils.PrepareSuccessOutput("You have no unsaved modules"))
+		utils.LogSuccess("You have no unsaved modules")
 		return
 	}
 
 	log.Infof(
-		utils.PrepareWarningOutput("\nUnsaved Modules (%d):\n\n%s"),
+		utils.ColorWarning("\nUnsaved Modules (%d):\n\n%s"),
 		len(changedModules),
 		strings.Join(changedModules, "\n"),
 	)
