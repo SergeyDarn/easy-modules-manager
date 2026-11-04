@@ -27,8 +27,8 @@ func GetModulesMap() ModulesMap {
 	return modulesMap
 }
 
-func Init() {
-	log.SetLevel(log.DebugLevel)
+func Init(logLevel log.Level) {
+	log.SetLevel(logLevel)
 
 	utils.InitEnv()
 
