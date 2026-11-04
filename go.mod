@@ -1,4 +1,4 @@
-module easymodules
+module easy-modules-manager
 
 go 1.24.2
 
