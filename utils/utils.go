@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"os"
 	"strings"
 
@@ -49,4 +50,15 @@ func PrepareDangerOutput(output string) string {
 
 func PrepareColorOutput(output string, color lipgloss.Color) string {
 	return lipgloss.NewStyle().Foreground(lipgloss.TerminalColor(color)).Render(output)
+}
+
+func ReadJson[T any](file string) T {
+	configJson, fileErr := os.ReadFile(file)
+	CheckError(fileErr, "Error when opening json configuration file")
+
+	var configJsonParsed T
+	jsonErr := json.Unmarshal(configJson, &configJsonParsed)
+	CheckError(jsonErr, "Error when parsing json configuration file")
+
+	return configJsonParsed
 }

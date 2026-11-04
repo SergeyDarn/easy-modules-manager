@@ -1,14 +1,14 @@
 package modules
 
 import (
-	"github.com/SergeyDarn/easy-modules-manager/utils"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/SergeyDarn/easy-modules-manager/utils"
 
 	"github.com/charmbracelet/log"
 )
@@ -25,14 +25,8 @@ func getModulesDir() string {
 }
 
 func ReadConfigJson() JsonConfig {
-	configJson, fileErr := os.ReadFile(utils.GetEnv(utils.ENV_CONFIG_FILE))
-	utils.CheckError(fileErr, "Error when opening json configuration file")
-
-	var configJsonParsed JsonConfig
-	jsonErr := json.Unmarshal(configJson, &configJsonParsed)
-	utils.CheckError(jsonErr, "Error when parsing json configuration file")
-
-	return configJsonParsed
+	configFile := utils.GetEnv(utils.ENV_CONFIG_FILE)
+	return utils.ReadJson[JsonConfig](configFile)
 }
 
 func CreateModulesDir() {
