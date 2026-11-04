@@ -9,6 +9,8 @@ import (
 	"github.com/charmbracelet/log"
 )
 
+var ModulesMap = map[string]string{}
+
 func Init() {
 	log.SetLevel(log.DebugLevel)
 
@@ -28,14 +30,13 @@ func Init() {
 	dependencies := configJson.Dependencies
 	maps.Copy(dependencies, configJson.DevDependencies)
 
-	gitDependencies := map[string]string{}
 	for key, value := range dependencies {
 		if utils.IsGitUrl(value) {
-			gitDependencies[key] = value
+			ModulesMap[key] = value
 		}
 	}
 
-	if len(gitDependencies) == 0 {
+	if len(ModulesMap) == 0 {
 		log.Info(utils.PrepareWarningOutput("No git modules to install."))
 		return
 	}
@@ -45,5 +46,5 @@ func Init() {
 	}
 
 	modules.CreateModulesDir()
-	modules.InstallModules(gitDependencies, *parallelInstall)
+	modules.InstallModules(ModulesMap, *parallelInstall)
 }
