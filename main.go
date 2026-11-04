@@ -4,8 +4,8 @@ import (
 	"flag"
 	"maps"
 
-	"easymodules/modules"
-	"easymodules/utils"
+	"github.com/SergeyDarn/easy-modules-manager/modules"
+	"github.com/SergeyDarn/easy-modules-manager/utils"
 
 	"github.com/charmbracelet/log"
 )

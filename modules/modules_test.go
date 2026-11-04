@@ -1,7 +1,7 @@
 package modules
 
 import (
-	"easymodules/utils"
+	"github.com/SergeyDarn/easy-modules-manager/utils"
 	"os"
 	"path/filepath"
 	"testing"
