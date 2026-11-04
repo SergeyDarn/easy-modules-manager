@@ -1,4 +1,4 @@
-module easy-modules-manager
+module github.com/SergeyDarn/easy-modules-manager
 
 go 1.24.2
 
