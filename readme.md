@@ -2,12 +2,12 @@
 
 ## Readable slow install (parallel install off)
 
-<img src="demo-slow.gif" width="400px" />
+<img src="demo-slow.gif" width="700px" />
 
 
 ## Fast install (default, parallel install on)
 
-<img src="demo-fast.gif" width="400px" />
+<img src="demo-fast.gif" width="700px" />
 
 
 ## Как работает библиотека
