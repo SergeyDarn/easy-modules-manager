@@ -64,6 +64,7 @@ func GitClone(
 	headLog := ColorText("head="+headName, headColor)
 	successLog := ColorSuccess("Cloning successful")
 	log.Debugf("%s %s %s", successLog, repoLog, headLog)
+	fmt.Println()
 }
 
 func GitDirStatus(dirPath string) git.Status {

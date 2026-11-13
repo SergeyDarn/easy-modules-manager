@@ -1,5 +1,15 @@
 # Easy Git Modules
 
+## Readable slow install (parallel install off)
+
+<img src="demo-slow.gif" width="400px" />
+
+
+## Fast install (default, parallel install on)
+
+<img src="demo-fast.gif" width="400px" />
+
+
 ## Как работает библиотека
 
 Исходный код полностью написан на го и скомпилирован в один бинарный файл. Для работы библиотеки достаточно скопировать этот бинарный файл в корень вашего проекта и настроить несколько переменных среды во втором файле (инструкция по установке ниже).
