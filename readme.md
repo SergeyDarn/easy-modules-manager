@@ -27,12 +27,19 @@
 > 3. Run `go build -o mod` inside the cloned repo to generate a compiled file for your operating system (instead of `mod` you can use any filename)
 
 1. Copy the `mod` file with the app to the place where you want to manage multiple git repositories.
-2. Copy `go.env` file from this repository to the same place. It contains the environment variables required for app to run.
+2. Copy `go.env` file from this repository to the same place. It contains the environment variables required for the app to run.
 3. You can change any environment variables you want in `go.env` + the app also reads a file `go.env.local`
 4. `!Important!` If you're cloning git repositories with ssh - set the path to your ssh key in the env config file.
-5. Run the app `./mod`
+5. Create `package.json` with the list of your git repositories (an example of the config file is available few headers lower) 
+6. Run the app to clone all your git repositories: `./mod`
 
-## Env config example
+### Final file structure in your project:
+`mod`<br>
+`package.json`<br>
+`go.env`<br>
+`go.env.local` (optional)<br>
+
+## `go.env` config example
 
 ```.env
 CONFIG_FILE="package.json"
@@ -41,10 +48,32 @@ SSH_KEY_PATH="/Users/your_username/.ssh/id_rsa"
 SSH_KEY_PASSWORD=""
 ```
 
-`CONFIG_FILE` - the name of the JSON file from which the list of git repositories to clone is read. Inside, the fields `dependencies` and `devDependencies` are used (for compatibility with standart package.json format)<br>
-`MODULES_DIR` - relative path to the directory to which git repositories will be cloned. Don't forget to add it to `.gitignore`<br>
+`CONFIG_FILE` - the name of the JSON file from which the list of git repositories to clone is read. Inside, the fields `dependencies` and `devDependencies` are used (for compatibility with standart package.json format)<br><br>
+`MODULES_DIR` - relative path to the directory to which git repositories will be cloned. Don't forget to add it to `.gitignore`<br><br>
 `SSH_KEY_PATH` - absolute(!) path to your local private ssh key<br>
 `SSH_KEY_PASSWORD` - your ssh key password (if there's none - leave empty)<br>
+
+## `package.json` config example
+
+```json
+{
+   "devDependencies": {
+      "test": "git@github.com:SergeyDarn/test-module-js.git",
+      "storefront-query-builder": "https://github.com/DivanteLtd/storefront-query-builder.git",
+   },
+   "dependencies": {
+      "scrape-search-ai": "https://github.com/SergeyDarn/scrape-search-ai#dev",
+      "magnific-popup": "git@github.com:SergeyDarn/Magnific-Popup.git#1.8.0",
+      "Course_Bash": "git@github.com:SergeyDarn/Course_Bash-Programming.git#3a7a19020151b45a29896c9142723efe5b11a061",
+   }
+}
+```
+
+1. Repository `test-module-js` with the name `test`. Normal ssh link
+2. Repository `storefront-query-builder`. Normal https link
+3. Repository `scrape-search-ai`. Https link with the branch `dev`
+4. Repository `Magnific-Popup` with the name `magnific-popup`. Ssh link with the tag `1.8.0` (the app uses `\d(\..*)+` regex for determining that it's a tag). 
+5. Repository `Course_Bash-Programming` with the name `Course_Bash`. Ssh link with a specific commit hash
 
 ## Available commands
 
@@ -61,24 +90,6 @@ SSH_KEY_PASSWORD=""
     ./mod -show-changed-modules=true 
 ```
 
-## Config file example
+## Usage as a go module
 
-1. Repository `test-module-js` with the name `test`. Normal ssh link
-2. Repository `storefront-query-builder`. Normal https link
-3. Repository `scrape-search-ai`. Https link with the branch `dev`
-4. Repository `Magnific-Popup` with the name `magnific-popup`. Ssh link with the tag `1.8.0` (the app uses `\d(\..*)+` regex for determining that it's a tag). 
-5. Repository `Course_Bash-Programming` with the name `Course_Bash`. Ssh link with a specific commit hash
-
-```json
-{
-   "devDependencies": {
-      "test": "git@github.com:SergeyDarn/test-module-js.git",
-      "storefront-query-builder": "https://github.com/DivanteLtd/storefront-query-builder.git",
-   },
-   "dependencies": {
-      "scrape-search-ai": "https://github.com/SergeyDarn/scrape-search-ai#dev",
-      "magnific-popup": "git@github.com:SergeyDarn/Magnific-Popup.git#1.8.0",
-      "Course_Bash": "git@github.com:SergeyDarn/Course_Bash-Programming.git#3a7a19020151b45a29896c9142723efe5b11a061",
-   }
-}
-```
+This app can also be installed as a go module in your go program. It wasn't planned at first, but I decided to implement it for my [Configs Manager](https://github.com/SergeyDarn/configs-manager) app. It's not pretty and for sure doesn't follow the best practices for creating go modules (because I don't know them), but it works.
