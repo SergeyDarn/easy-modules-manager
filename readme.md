@@ -30,6 +30,7 @@
 2. Copy `go.env` file from this repository to the same place. It contains the environment variables required for app to run.
 3. You can change any environment variables you want in `go.env` + the app also reads a file `go.env.local`
 4. `!Important!` If you're cloning git repositories with ssh - set the path to your ssh key in the env config file.
+5. Run the app `./mod`
 
 ## Env config example
 
