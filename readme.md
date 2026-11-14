@@ -1,4 +1,4 @@
-# Easy Git Modules
+# Easy Git Modules Manager
 
 ## Readable slow install (parallel install off)
 
@@ -10,52 +10,63 @@
 <img src="demo-fast.gif" width="700px" />
 
 
-## Как работает библиотека
+## How it works
 
-Исходный код полностью написан на го и скомпилирован в один бинарный файл. Для работы библиотеки достаточно скопировать этот бинарный файл в корень вашего проекта и настроить несколько переменных среды во втором файле (инструкция по установке ниже).
+1. The list of git repositories to clone is read from the config file (`package.json` by default, can be changed) from `dependencies` and `devDependencies` fields.
+2. All git repositories are cloned into the specified folder (`src/modules` by default, can be changed)
+3. Before cloning a repo, the local folder with this repo is deleted if it exists. 
+4. If a repository has unsaved changes, it is skipped so you won't lose any changes
 
-А по своей логике, библиотека считывает список гит-репозиториев из `package.json` (или кастомного файла) и клонирует эти репозитории в заданную вами папку. Дальше такие гит-репозитории/зависимости буду называть модулями.
 
-Кроме того, библиотека предоставляет удобную команду для вывода списка установленных модулей, в которых присутствуют незакомиченные изменения.
+## How to use
 
-## Установка
+> If you're on mac, you can just use already compiled `mod` file from this repo.
+> If you're not on mac:
+> 1. Clone this repo
+> 2. Install go
+> 3. Run `go build -o mod` inside the cloned repo to generate a compiled file for your operating system (instead of `mod` you can use any filename)
 
-1. Скопировать в корень проекта файл `mod` из репозитория
-2. Скопировать в корень проекта файл конфига `go.env`
-3. Cоздать в корне проекта файл локального конфига `go.env.local` и не забыть добавить его в `.gitignore`
-4. Задать настройки в файлах `go.env` и `go.env.local`
+1. Copy the `mod` file with the app to the place where you want to manage multiple git repositories.
+2. Copy `go.env` file from this repository to the same place. It contains the environment variables required for app to run.
+3. You can change any environment variables you want in `go.env` + the app also reads a file `go.env.local`
+4. `!Important!` If you're cloning git repositories with ssh - set the path to your ssh key in the env config file.
+
+## Env config example
+
 ```.env
 CONFIG_FILE="package.json"
 MODULES_DIR="src/modules"
-SSH_KEY_PATH="/Users/user/.ssh/id_rsa"
+SSH_KEY_PATH="/Users/your_username/.ssh/id_rsa"
 SSH_KEY_PASSWORD=""
 ```
-`CONFIG_FILE` - JSON файл, из которого получается список модулей для установки (используются поля на верхнем уровне `dependencies` и `devDependencies` - как в обычном `package.json`)<br>
-`MODULES_DIR` - Папка, в которую устанавливаются модули. Не забудьте добавить ее в `.gitignore`<br>
-`SSH_KEY_PATH` - Абсолютный(!) путь к вашему локальному приватному SSH ключу<br>
-`SSH_KEY_PASSWORD` - Пароль к вашему локальному приватному SSH ключу<br>
 
-SSH Ключ и пароль в конфиге прописывать обязательно если вы будете клонировать модули по SSH - без этого функционал работать не будет (пароль нужен только если задавали его при создании ssh ключа, по умолчанию он пустой).
+`CONFIG_FILE` - the name of the JSON file from which the list of git repositories to clone is read. Inside, the fields `dependencies` and `devDependencies` are used (for compatibility with standart package.json format)<br>
+`MODULES_DIR` - relative path to the directory to which git repositories will be cloned. Don't forget to add it to `.gitignore`<br>
+`SSH_KEY_PATH` - absolute(!) path to your local private ssh key<br>
+`SSH_KEY_PASSWORD` - your ssh key password (if there's none - leave empty)<br>
 
-Как узнать свой SSH ключ - зайти в папку `~/.ssh` и там будет файл по типу `id_rsa` или `id_ed25330` - это нужный нам приватный ssh ключ. Чтобы узнать его абсолютный путь, в той же папке пишем `pwd` и складываем результат вывода в консоли с именем файла, и прописываем это в файле конфига.
+## Available commands
 
-## Команды модуля
-```shell
-    ./mod -h # Вывести в консоль полный список команд библиотеки
-    ./mod # Запустить установку модулей (параллельная по дефолту, каждый модуль проверяется отдельно и если в каком-то из модулей есть изменения - он пропускается)
-    ./mod -parallel-install=false # Запустить установку модулей (не параллельно)
-    ./mod -safe-install=false # Запустить установку модулей с предварительным удалением корневой папки модулей для переустановки (по умолчанию такого нет)
-
-    ./mod -show-changed-modules=true # Запустить отдельную команду, чтобы посмотреть список модулей в которых есть локальные изменения в гите
+```bash
+    # Help. List all available commands
+    ./mod -h
+    # Run the app
+    ./mod 
+    # Run the app without cloning repositories in parallel. Much slower, but better log readability.
+    ./mod -parallel-install=false
+    # Forcibly delete the whole directory with your git repositories before running the app.
+    ./mod -safe-install=false 
+    # See the list of git repositories that have unsaved local changes. No repositories are cloned when using this flag
+    ./mod -show-changed-modules=true 
 ```
 
-## Примеры референсов на модули в конфиге
+## Config file example
 
-1. Просто Ssh ссылка на модуль 
-2. Просто Https ссылка на модуль
-3. Ветки (если в модуле в ветке что-то изменяется и коммитится, то без обновления референса в конфиге при инсталле все новые обновления подтянулся)
-4. Тэги (используется регулярка `\d(\..*)+` для определения что это тэг)
-5. Хэш коммита
+1. Repository `test-module-js` with the name `test`. Normal ssh link
+2. Repository `storefront-query-builder`. Normal https link
+3. Repository `scrape-search-ai`. Https link with the branch `dev`
+4. Repository `Magnific-Popup` with the name `magnific-popup`. Ssh link with the tag `1.8.0` (the app uses `\d(\..*)+` regex for determining that it's a tag). 
+5. Repository `Course_Bash-Programming` with the name `Course_Bash`. Ssh link with a specific commit hash
 
 ```json
 {
