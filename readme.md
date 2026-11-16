@@ -87,7 +87,9 @@ SSH_KEY_PASSWORD=""
     # Forcibly delete the whole directory with your git repositories before running the app.
     ./mod -safe-install=false 
     # See the list of git repositories that have unsaved local changes. No repositories are cloned when using this flag
-    ./mod -show-changed-modules=true 
+    ./mod --status
+    # Perform git pull for all repositories
+    ./mod --pull
 ```
 
 ## Usage as a go module

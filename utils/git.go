@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -69,15 +70,60 @@ func GitClone(
 
 func GitDirStatus(dirPath string) git.Status {
 	repo, err := git.PlainOpen(dirPath)
-	CheckError(err, "Error while trying to open module directory "+dirPath+" in git for gitFolderStatus")
+	CheckError(err, "Error while trying to open directory in git (GitDirStatus): "+dirPath)
 
 	workTree, err := repo.Worktree()
-	CheckError(err, "Error while getting workTree for gitFolderStatus")
+	CheckError(err, "Error while getting workTree (GitDirStatus) for "+dirPath)
 
 	status, err := workTree.Status()
-	CheckError(err, "Error while trying to get git status")
+	CheckError(err, "Error while trying to get git status for "+dirPath)
 
 	return status
+}
+
+func GitPull(dirPath string) {
+	repo, err := git.PlainOpen(dirPath)
+	if CheckErrorNoPanic(err, "Error while trying to open directory in git (GitPull): "+dirPath) {
+		return
+	}
+
+	head, err := repo.Head()
+	if CheckErrorNoPanic(err, "Error while getting repo head (GitPull) for "+dirPath) {
+		return
+	}
+
+	if !head.Name().IsBranch() {
+		LogWarning(dirPath + " is not on any branch. Skipping git pull")
+		return
+	}
+
+	workTree, err := repo.Worktree()
+	if CheckErrorNoPanic(err, "Error while getting workTree (GitPull) for "+dirPath) {
+		return
+	}
+
+	remotes, err := repo.Remotes()
+	if CheckErrorNoPanic(err, "Error while getting remotes (GitPull) for "+dirPath) {
+		return
+	}
+
+	remoteUrl := remotes[0].Config().URLs[0]
+	branchName := head.Name().Short()
+
+	authOptions := &git.PullOptions{
+		ReferenceName: plumbing.NewBranchReferenceName(branchName),
+	}
+	auth := getGitAuth(remoteUrl)
+	if auth != nil {
+		authOptions.Auth = auth
+	}
+
+	err = workTree.Pull(authOptions)
+	isUptodateErr := errors.Is(err, git.NoErrAlreadyUpToDate)
+
+	if isUptodateErr || !CheckErrorNoPanic(err, "Git pull error for "+dirPath) {
+		LogSuccess("Successfull git pull for " + dirPath)
+	}
 }
 
 func GitCheckoutToCommit(
@@ -232,7 +278,7 @@ func getGitAuth(repoUrl string) *ssh.PublicKeys {
 	sshKeyPassword := GetSshKeyPassword()
 
 	auth, err := ssh.NewPublicKeysFromFile("git", sshKeyPath, sshKeyPassword)
-	CheckError(err, "Error while creating git clone auth")
+	CheckError(err, "Error while creating ssh git auth")
 
 	return auth
 }

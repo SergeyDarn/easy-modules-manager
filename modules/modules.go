@@ -106,6 +106,17 @@ func installModule(moduleName string, moduleUrl string) {
 	utils.GitClone(moduleName, moduleUrl, moduleDir)
 }
 
+func PullModules() {
+	modules, err := os.ReadDir(getModulesDir())
+	utils.CheckError(err, "Error reading modules folder")
+
+	for _, module := range modules {
+		utils.GitPull(
+			getModuleDir(module.Name()),
+		)
+	}
+}
+
 func ShowChangedModules() {
 	modules, err := os.ReadDir(getModulesDir())
 	utils.CheckError(err, "Error reading modules folder")

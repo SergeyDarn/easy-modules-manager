@@ -23,6 +23,16 @@ func CheckError(err error, readableErrMessage string) {
 	ThrowError(readableErrMessage + ": " + err.Error())
 }
 
+func CheckErrorNoPanic(err error, readableErrMessage string) bool {
+	if err == nil {
+		return false
+	}
+
+	LogError(readableErrMessage + ": " + err.Error())
+
+	return true
+}
+
 func ThrowError(err string) {
 	panic(ColorDanger(err))
 }
