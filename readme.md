@@ -2,20 +2,20 @@
 
 ## Readable slow install (parallel install off)
 
-<img src="demo-slow.gif" width="700px" />
+<img src="demos/demo-slow.gif" width="700px" />
 
 
 ## Fast install (default, parallel install on)
 
-<img src="demo-fast.gif" width="700px" />
+<img src="demos/demo-fast.gif" width="700px" />
 
 ## Git status for all repositories
 
-<img src="demo-status.gif" width="700px" />
+<img src="demos/demo-status.gif" width="700px" />
 
 ## Git pull all repositories
 
-<img src="demo-pull.gif" width="700px" />
+<img src="demos/demo-pull.gif" width="700px" />
 
 ## How it works
 

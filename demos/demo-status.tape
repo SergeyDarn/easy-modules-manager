@@ -1,8 +1,8 @@
 Output demo-status.gif
 
-Set FontSize 30
-Set Width 1400
-Set Height 800
+Set FontSize 40
+Set Width 900
+Set Height 500
 
 Type "go run . --status"
 

@@ -1,6 +1,6 @@
 Output demo-pull.gif
 
-Set FontSize 30
+Set FontSize 36
 Set Width 1400
 Set Height 800
 
