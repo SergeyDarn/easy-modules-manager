@@ -32,9 +32,9 @@ func GitClone(
 	repoUrl string,
 	repoDirPath string,
 ) {
-	repoLog := ColorText("repo="+repoName, repoColor)
-	urlLog := ColorText("url="+repoUrl, urlColor)
-	log.Debugf("Cloning %s %s", repoLog, urlLog)
+	repoLog := ColorTextf("repo=%s", repoColor, repoName)
+	urlLog := ColorTextf("url=%s", urlColor, repoUrl)
+	log.Debugf("cloning %s %s", repoLog, urlLog)
 
 	cleanModuleUrl, commitHash, branch, tag := parseGitUrl(repoUrl)
 	reference := branch
@@ -53,7 +53,7 @@ func GitClone(
 	}
 
 	repo, err := git.PlainClone(repoDirPath, false, options)
-	CheckError(err, "Error while clonning "+repoLog)
+	CheckErrorf(err, "error while clonning %s", repoLog)
 
 	if commitHash != "" {
 		GitCheckoutToCommit(repo, repoName, commitHash)
@@ -62,48 +62,52 @@ func GitClone(
 	headName := GetHeadShortName(repo, commitHash != "", tag != "")
 	headColor := getGitColor(commitHash != "", tag != "")
 
-	headLog := ColorText("head="+headName, headColor)
-	successLog := ColorSuccess("Cloning successful")
+	headLog := ColorTextf("head=%s", headColor, headName)
+	successLog := ColorSuccess("cloning successful")
 	log.Debugf("%s %s %s", successLog, repoLog, headLog)
 	fmt.Println()
 }
 
 func GitDirStatus(dirPath string) git.Status {
 	repo, err := git.PlainOpen(dirPath)
-	CheckError(err, "Error while trying to open directory in git (GitDirStatus): "+dirPath)
+	CheckErrorf(err, "error while trying to open directory in git (GitDirStatus): %s", dirPath)
 
 	workTree, err := repo.Worktree()
-	CheckError(err, "Error while getting workTree (GitDirStatus) for "+dirPath)
+	CheckErrorf(err, "error while getting workTree (GitDirStatus) for %s", dirPath)
 
 	status, err := workTree.Status()
-	CheckError(err, "Error while trying to get git status for "+dirPath)
+	CheckErrorf(err, "Error while trying to get git status for %s", dirPath)
 
 	return status
 }
 
 func GitPull(dirPath string) {
 	repo, err := git.PlainOpen(dirPath)
-	if CheckErrorNoPanic(err, "Error while trying to open directory in git (GitPull): "+dirPath) {
+	if err != nil {
+		LogReadableErrorf(err, "error while trying to open directory in git (GitPull): %s", dirPath)
 		return
 	}
 
 	head, err := repo.Head()
-	if CheckErrorNoPanic(err, "Error while getting repo head (GitPull) for "+dirPath) {
+	if err != nil {
+		LogReadableErrorf(err, "error while getting repo head (GitPull) for %s", dirPath)
 		return
 	}
 
 	if !head.Name().IsBranch() {
-		LogWarning(dirPath + " is not on any branch. Skipping git pull")
+		LogWarningf("%s is not on any branch. skipping git pull", dirPath)
 		return
 	}
 
 	workTree, err := repo.Worktree()
-	if CheckErrorNoPanic(err, "Error while getting workTree (GitPull) for "+dirPath) {
+	if err != nil {
+		LogReadableErrorf(err, "error while getting workTree (GitPull) for %s", dirPath)
 		return
 	}
 
 	remotes, err := repo.Remotes()
-	if CheckErrorNoPanic(err, "Error while getting remotes (GitPull) for "+dirPath) {
+	if err != nil {
+		LogReadableErrorf(err, "error while getting remotes (GitPull) for %s", dirPath)
 		return
 	}
 
@@ -121,8 +125,10 @@ func GitPull(dirPath string) {
 	err = workTree.Pull(authOptions)
 	isUptodateErr := errors.Is(err, git.NoErrAlreadyUpToDate)
 
-	if isUptodateErr || !CheckErrorNoPanic(err, "Git pull error for "+dirPath) {
-		LogSuccess("Successfull git pull for " + dirPath)
+	if err != nil && !isUptodateErr {
+		LogReadableErrorf(err, "git pull error for %s", dirPath)
+	} else {
+		LogSuccessf("successfull git pull for %s", dirPath)
 	}
 }
 
@@ -136,7 +142,7 @@ func GitCheckoutToCommit(
 	}
 
 	workTree, err := repo.Worktree()
-	CheckError(err, fmt.Sprintf("Error while getting repo %s worktree before checkout", repoName))
+	CheckErrorf(err, "error while getting repo %s worktree before checkout", repoName)
 
 	err = workTree.Checkout(&git.CheckoutOptions{
 		Hash: plumbing.NewHash(commitHash),
@@ -144,7 +150,7 @@ func GitCheckoutToCommit(
 
 	repoLog := "repo=" + repoName
 	commitLog := "commitHash=" + commitHash
-	CheckError(err, fmt.Sprintf("Error while trying to checkout %s %s", repoLog, commitLog))
+	CheckErrorf(err, "error while trying to checkout repo=%s commitHash=%s", repoLog, commitLog)
 
 	repoColorLog := ColorText(repoLog, repoColor)
 	commitColorLog := ColorText(commitLog, hashColor)
@@ -157,7 +163,7 @@ func IsGitUrl(url string) bool {
 
 func GetHeadShortName(repo *git.Repository, isCommit bool, isTag bool) string {
 	head, err := repo.Head()
-	CheckError(err, "Error while getting repo head (GetHeadShortName)")
+	CheckError(err, "error while getting repo head (GetHeadShortName)")
 
 	if isCommit {
 		return head.Hash().String()
@@ -166,9 +172,7 @@ func GetHeadShortName(repo *git.Repository, isCommit bool, isTag bool) string {
 	if isTag {
 		headTag := GetHeadTag(repo)
 		if headTag == nil {
-			ThrowError(
-				fmt.Sprintf("Couldn't find tag for head %s (GetHeadShortName)", head.String()),
-			)
+			ThrowErrorf("couldn't find tag for head %s (GetHeadShortName)", head.String())
 		}
 
 		return headTag.Name().Short()
@@ -179,16 +183,16 @@ func GetHeadShortName(repo *git.Repository, isCommit bool, isTag bool) string {
 
 func GetHeadTag(repo *git.Repository) *plumbing.Reference {
 	head, err := repo.Head()
-	CheckError(err, "Error while getting repo head (GetHeadTag)")
+	CheckError(err, "error while getting repo head (GetHeadTag)")
 
 	tags, err := repo.Tags()
-	CheckError(err, "Error while getting repo tags (GetHeadTag)")
+	CheckError(err, "error while getting repo tags (GetHeadTag)")
 
 	var headTag *plumbing.Reference
 
 	tags.ForEach(func(tag *plumbing.Reference) error {
 		tagHash, err := repo.ResolveRevision(plumbing.Revision(tag.Name()))
-		CheckError(err, "Error while resolving revision (GetHeadTag)")
+		CheckError(err, "error while resolving revision (GetHeadTag)")
 
 		if *tagHash == head.Hash() {
 			headTag = tag
@@ -220,7 +224,7 @@ func parseGitUrl(gitUrl string) (
 	}
 
 	if (splitUrl[1] == "") || (len(splitUrl) > 2) {
-		ThrowError("Cannot properly parse url " + gitUrl + " Aborting.")
+		ThrowErrorf("cannot properly parse url %s. aborting", gitUrl)
 	}
 
 	baseReference := splitUrl[1]
@@ -249,21 +253,21 @@ func prepareGitReference(baseReference string) (
 		branch = plumbing.NewBranchReferenceName(baseReference)
 	}
 
-	baseLog := "Parsed from git url "
+	baseLog := "parsed from git url "
 
 	if commitHash != "" {
-		commitLog := ColorText("commitHash="+commitHash, hashColor)
+		commitLog := ColorTextf("commitHash=%s", hashColor, commitHash)
 		log.Debug(baseLog + commitLog)
 	}
 
 	if branch != "" {
-		branchLog := ColorText("branch="+branch.Short(), branchColor)
+		branchLog := ColorTextf("branch=%s", branchColor, branch.Short())
 		log.Debug(baseLog + branchLog)
 	}
 
 	if tag != "" {
-		tagLog := ColorText("tag="+tag.Short(), tagColor) + " "
-		log.Debug(baseLog + tagLog)
+		tagLog := ColorTextf("tag=%s", tagColor, tag.Short())
+		log.Debug(baseLog + tagLog + " ")
 	}
 
 	return commitHash, branch, tag
@@ -278,7 +282,7 @@ func getGitAuth(repoUrl string) *ssh.PublicKeys {
 	sshKeyPassword := GetSshKeyPassword()
 
 	auth, err := ssh.NewPublicKeysFromFile("git", sshKeyPath, sshKeyPassword)
-	CheckError(err, "Error while creating ssh git auth")
+	CheckError(err, "error while creating ssh git auth")
 
 	return auth
 }

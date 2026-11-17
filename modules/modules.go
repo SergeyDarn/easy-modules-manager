@@ -31,17 +31,17 @@ func ReadConfigJson() JsonConfig {
 
 func CreateModulesDir() {
 	err := os.MkdirAll(getModulesDir(), modulesDirPermissions)
-	utils.CheckError(err, "Error when creating modules folder")
+	utils.CheckError(err, "error when creating modules folder")
 }
 
 func RemoveModulesDir() {
 	err := os.RemoveAll(getModulesDir())
-	utils.CheckError(err, "Error while trying to delete modules folder")
-	log.Debug(utils.ColorDanger("Modules folder deleted before installation"))
+	utils.CheckError(err, "error while trying to delete modules folder")
+	log.Debug(utils.ColorDanger("modules folder deleted before installation"))
 }
 
 func InstallModules(modules map[string]string, parallelInstall bool) {
-	log.Infof("Installing modules into %s", getModulesDir())
+	log.Infof("installing modules into %s", getModulesDir())
 	fmt.Println()
 
 	start := time.Now()
@@ -66,7 +66,7 @@ func InstallModules(modules map[string]string, parallelInstall bool) {
 	}
 
 	log.Infof(
-		utils.ColorSuccess("Installation of %d modules took %s"),
+		utils.ColorSuccess("installation of %d modules took %s"),
 		len(modules),
 		time.Since(start),
 	)
@@ -85,13 +85,13 @@ func installModule(moduleName string, moduleUrl string) {
 		return
 	}
 
-	utils.CheckError(err, "Error while reading module "+moduleName+" folder")
+	utils.CheckErrorf(err, "error while reading module %s folder", moduleName)
 
 	gitStatus := utils.GitDirStatus(moduleDir)
 	if gitStatus.String() != "" {
 		log.Warnf(
 			utils.ColorWarning(
-				"\nThere are unsaved changes for module \"%s\" - skipping it\n"+
+				"\nthere are unsaved changes for module \"%s\" - skipping it\n"+
 					"\n%s",
 			),
 			moduleName,
@@ -101,14 +101,14 @@ func installModule(moduleName string, moduleUrl string) {
 	}
 
 	err = os.RemoveAll(moduleDir)
-	utils.CheckError(err, "Error while trying to delete module folder for "+moduleName)
+	utils.CheckErrorf(err, "error while trying to delete module folder for %s", moduleName)
 
 	utils.GitClone(moduleName, moduleUrl, moduleDir)
 }
 
 func PullModules() {
 	modules, err := os.ReadDir(getModulesDir())
-	utils.CheckError(err, "Error reading modules folder")
+	utils.CheckError(err, "error reading modules folder")
 
 	for _, module := range modules {
 		utils.GitPull(
@@ -119,7 +119,7 @@ func PullModules() {
 
 func ShowChangedModules() {
 	modules, err := os.ReadDir(getModulesDir())
-	utils.CheckError(err, "Error reading modules folder")
+	utils.CheckError(err, "error reading modules folder")
 	changedModules := []string{}
 
 	for _, module := range modules {
@@ -133,12 +133,12 @@ func ShowChangedModules() {
 	}
 
 	if len(changedModules) == 0 {
-		utils.LogSuccess("You have no unsaved modules")
+		utils.LogSuccess("you have no unsaved modules")
 		return
 	}
 
 	log.Infof(
-		utils.ColorWarning("\nUnsaved Modules (%d):\n\n%s"),
+		utils.ColorWarning("\nunsaved modules (%d):\n\n%s"),
 		len(changedModules),
 		strings.Join(changedModules, "\n"),
 	)

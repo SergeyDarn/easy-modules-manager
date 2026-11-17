@@ -30,11 +30,11 @@ func InitEnv() {
 
 	err := godotenv.Load(filepath.Join(envRoot, "go.env.local"))
 	if err != nil {
-		LogWarning("FYI: couldn't open go.env.local")
+		LogWarning("fyi: couldn't open go.env.local")
 	}
 
 	err = godotenv.Load(filepath.Join(envRoot, "go.env"))
-	CheckError(err, "Error loading go.env file")
+	CheckError(err, "error loading go.env file")
 }
 
 func GetModulesDir() string {

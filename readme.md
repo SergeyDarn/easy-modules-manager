@@ -9,6 +9,13 @@
 
 <img src="demo-fast.gif" width="700px" />
 
+## Git status for all repositories
+
+<img src="demo-status.gif" width="700px" />
+
+## Git pull all repositories
+
+<img src="demo-pull.gif" width="700px" />
 
 ## How it works
 
