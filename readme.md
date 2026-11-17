@@ -13,7 +13,7 @@
 
 <img src="demos/demo-status.gif" width="700px" />
 
-## Git pull all repositories
+## Git pull in all repositories
 
 <img src="demos/demo-pull.gif" width="700px" />
 
