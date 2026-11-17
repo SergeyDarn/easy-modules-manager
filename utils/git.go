@@ -154,7 +154,7 @@ func GitCheckoutToCommit(
 
 	repoColorLog := ColorText(repoLog, repoColor)
 	commitColorLog := ColorText(commitLog, hashColor)
-	log.Debugf("Sucessful checkout for %s to %s", repoColorLog, commitColorLog)
+	log.Debugf("sucessful checkout for %s to %s", repoColorLog, commitColorLog)
 }
 
 func IsGitUrl(url string) bool {
